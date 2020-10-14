@@ -10,7 +10,7 @@ import (
 
 type Players map[game.Color]Player
 
-type GameController struct {
+type GameRunner struct {
 	win       *pixelgl.Window
 	gameBoard [8][8]pixel.Vec
 	h         float64
@@ -21,12 +21,12 @@ type Controller interface {
 	Run(boards chan<- game.Event)
 }
 
-func NewGameController(
+func NewGameRunner(
 	win *pixelgl.Window,
 	gameBoard [8][8]pixel.Vec,
 	spriteHeight, spriteWidth float64,
-) *GameController {
-	return &GameController{
+) *GameRunner {
+	return &GameRunner{
 		win:       win,
 		gameBoard: gameBoard,
 		h:         spriteHeight,
@@ -34,20 +34,20 @@ func NewGameController(
 	}
 }
 
-func (controller *GameController) initPlayers() Players {
+func (runner *GameRunner) initPlayers() Players {
 	players := make(Players)
 
 	var playerFirst Player
 	var playerSecond Player
 	for {
-		input := controller.win.Typed()
+		input := runner.win.Typed()
 		if input == "1" {
-			playerFirst = NewRealPlayer(controller.win, controller.gameBoard, controller.h, controller.w)
+			playerFirst = NewRealPlayer(runner.win, runner.gameBoard, runner.h, runner.w)
 			playerSecond = NewBotPlayer()
 			break
 		} else if input == "2" {
-			playerFirst = NewRealPlayer(controller.win, controller.gameBoard, controller.h, controller.w)
-			playerSecond = NewRealPlayer(controller.win, controller.gameBoard, controller.h, controller.w)
+			playerFirst = NewRealPlayer(runner.win, runner.gameBoard, runner.h, runner.w)
+			playerSecond = NewRealPlayer(runner.win, runner.gameBoard, runner.h, runner.w)
 			break
 		}
 		time.Sleep(time.Millisecond)
@@ -59,12 +59,12 @@ func (controller *GameController) initPlayers() Players {
 	return players
 }
 
-func (controller *GameController) Run(events chan<- game.Event) {
+func (runner *GameRunner) Run(events chan<- game.Event) {
 	for {
 		events <- game.Event{
 			Event: game.GameStarted,
 		}
-		players := controller.initPlayers()
+		players := runner.initPlayers()
 		gameModel := game.NewGame(events)
 		for !gameModel.IsGameFinished() {
 			currentColor := gameModel.CurrentColor
@@ -80,7 +80,7 @@ func (controller *GameController) Run(events chan<- game.Event) {
 			WhiteResult: whiteRes,
 			BlackResult: blackRes,
 		}
-		for !controller.win.JustPressed(pixelgl.KeyEnter) {
+		for !runner.win.JustPressed(pixelgl.KeyEnter) {
 			time.Sleep(time.Millisecond)
 		}
 	}

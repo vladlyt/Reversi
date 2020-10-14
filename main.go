@@ -37,7 +37,7 @@ func run() {
 		SpriteHeight,
 		SpriteWidth,
 	)
-	gameController := controller.NewGameController(
+	gameController := controller.NewGameRunner(
 		win,
 		gameView.GetBoard(),
 		float64(SpriteHeight),
